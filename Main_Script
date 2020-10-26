@@ -34,6 +34,9 @@ foreach ( $city_state in $forRealtor ) {
         Write-Progress -activity "Collecting information for $city_state ($b of $allLocations)" -Status "Working..." -Id 1 -PercentComplete (($b / $allLocations) * 100)
         sleep 1
         
+        $homeNum = $null
+        $pageNum = $null
+        
         $firstPage = iwr -uri "https://www.realtor.com/realestateandhomes-search/$city_state/beds-2/baths-1/type-single-family-home/price-10000-250000"
 
         $homeNum = $firstPage.ParsedHtml.getElementsByTagName('span') | Where-Object { $_.classname -like "*result-count*" }
