@@ -1,0 +1,46 @@
+$Url = 'https://worldpopulationreview.com/state-rankings/property-taxes-by-state'
+
+$TaxPage = Invoke-Webrequest -Uri $Url
+
+# Iterate over each <tbody> which contain all the body rows for each table
+$avgTaxes = $TaxPage.ParsedHtml.getElementsByTagName("tbody")[0] | ForEach-Object {
+
+    # Might need to uncomment the following line depending on table being parsed
+    # And if there is more than one table, need a way to get the right headers for each table
+    $Headers = @("State", "Taxes")
+
+    # Iterate over each <tr> in this table body
+    $_.getElementsByTagName("tr") | ForEach-Object {
+        # Select/get the <td>'s, but just grab the InnerText and make them an array
+        $OutputRow = $_.getElementsByTagName("td") | Select-Object -ExpandProperty InnerText
+        # If $Headers not defined, this must be the first row and must contain headers
+        # Otherwise create an object out of the row by building up a hash and then using it to make an object
+        # These objects can be piped to a lot of different cmdlets, like Out-GridView, ConvertTo-Csv, Format-Table, etc.
+        if ($Headers) {
+            $OutputHash = [ordered]@{}
+            for($i=0;$i -lt $OutputRow.Count;$i++) {
+                $OutputHash[$Headers[$i]] = $OutputRow[$i]
+            }
+            New-Object psobject -Property $OutputHash
+        } else {
+            $Headers = $OutputRow
+        }
+    }
+}
+
+$allTaxesInt = $avgTaxes.taxes -replace '[%]'
+
+[array]$allTaxesInt = foreach($number in $allTaxesInt) {
+    try {
+        [int]::Parse($number)
+    } catch {
+        Invoke-Expression -Command $number;
+    }
+}
+
+$num = 0
+
+Do { $num++
+    } until ($fullState -eq $avgTaxes[$num].state)
+
+$global:proptax = $allTaxesInt[$num] / 100
