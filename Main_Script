@@ -1,0 +1,291 @@
+Import-Module PSWriteExcel
+
+#Changes directory to script location
+$ScriptDir = Split-Path $script:MyInvocation.MyCommand.Path
+cd $ScriptDir
+
+. "$PSScriptRoot\state_abbr.ps1"
+. "$PSScriptRoot\avg_ins.ps1"
+. "$PSScriptRoot\avg_taxes.ps1"
+
+$arrayFromFile = @(Get-Content 'city_state.txt')
+
+$stateRealtor = ForEach ($line in $arrayFromFile) {
+        $line.split()[-1]
+}
+
+$cityRealtor = ForEach ($line in $arrayFromFile) {
+        $line.Substring(0, $line.Length-3)
+        }
+
+$cityRealtor = $cityRealtor -replace '\s', '-'
+
+$forRealtor = for ( $i = 0; $i -lt $arrayFromFile.Count; $i++) {
+        $cityRealtor[$i] + '_' + $stateRealtor[$i]
+}
+
+$allLocations = $forRealtor.Count
+
+$b = 0
+
+foreach ( $city_state in $forRealtor ) {
+        
+        $b++
+        Write-Progress -activity "Collecting information for $city_state ($b of $allLocations)" -Status "Working..." -Id 1 -PercentComplete (($b / $allLocations) * 100)
+        sleep 1
+        
+        $firstPage = iwr -uri "https://www.realtor.com/realestateandhomes-search/$city_state/beds-2/baths-1/type-single-family-home/price-10000-250000"
+
+        $homeNum = $firstPage.ParsedHtml.getElementsByTagName('span') | Where-Object { $_.classname -like "*result-count*" }
+
+        $homeNum = $homeNum[1].innerText -replace '\sHomes'
+
+        $homeNum = $homeNum -as [int]
+
+        $pageNum = [Math]::Ceiling($homeNum / 42)
+
+        [System.Collections.ArrayList]$numArray = @(1..$pageNum)
+        [System.Collections.ArrayList]$secArray = @(60..75)
+        [System.Collections.ArrayList]$minuteArray = @(1800, 2100, 2400, 2700, 3000, 3300, 3600)
+
+        1..45 |
+        ForEach-Object { $percent = $_ * 100 / 45; 
+            Write-Progress -Activity "Break before data collection" -Status "$(45 - $_) seconds remaining..." -Id 2 -PercentComplete $percent -ParentId 1; 
+            Start-Sleep -Seconds 1
+            }
+
+        $a = 0
+
+        $allData = [System.Collections.ArrayList]@()
+
+        $allData = foreach ($num in $numArray) {
+                        
+                        $a++
+                        Write-Progress -activity "Collecting links from page $num of $pageNum" -Status "Working..." -Id 3 -PercentComplete (($a / $pageNum) * 100) -ParentId 1
+                        sleep 1
+
+                        $sec = $secArray | Get-Random
+                        $price = $null
+                        $address = $null
+                        $beds = $null
+                        $baths = $null
+                        $allMort = $null
+                        $bathsForRent = $null
+                        $allRents = $null
+                        $allExpenses = $null
+
+                        $url = "https://www.realtor.com/realestateandhomes-search/$city_state/beds-2/baths-1/type-single-family-home/price-10000-250000/pg-$num"
+
+                        $page = iwr -uri $url
+
+                        $city = $city_state.Split("_")[0]
+                        $global:state = $city_state.Split("_")[-1]
+
+                        # Gets Price, Address, Bed number, and Bath number for each object on page
+
+                        $price = $page.ParsedHTML.getElementsByTagName("div") | Where-Object { $_.classname -like "*price*" -and $_.outerHTML -like "*pc-price*" }
+                        $address = $page.ParsedHTML.getElementsByTagName("div") | Where-Object { $_.classname -like "*address ellipsis*" }
+                        $beds = $page.ParsedHtml.getElementsByTagName("li") | Where-Object { $_.classname -like "*prop-meta srp_list*" -and $_.outerHTML -like "*meta-bed*" }
+                        $baths = $page.ParsedHtml.getElementsByTagName("li") | Where-Object { $_.classname -like "*prop-meta srp_list*" -and $_.outerHTML -like "*meta-bath*" }
+
+                        # Gets all innerText for each above search
+
+                        $address = $address.innerText
+                        $price = $price.innerText
+                        $beds = $beds.innerText
+                        $baths = $baths.innerText
+
+                        # Removes wrong characters from $price
+
+                        $price = $price -replace 'From\s'
+
+                        $price = foreach ($p in $price) {
+                            if ($p.length -gt 8) {
+                                $p.SubString(0,8)
+                                } else { 
+                                    write $p
+                                    }
+                        }
+
+                        # Removes $ and , from price
+
+                        $price = for ($i = 0; $i -lt $price.Count; $i++) {
+                                    $price[$i] -replace '[$,]'
+                                    }
+
+                        $beds = for ($i = 0; $i -lt $beds.Count; $i++) {
+                                    $beds[$i] -replace 'bed'
+                                    }
+
+                        $baths = for ($i = 0; $i -lt $baths.Count; $i++) {
+                                    $baths[$i].SubString(0,1)
+                                    }
+
+                        # Converts price, beds, and baths from string to integer
+
+                        $askingPrice = ForEach ($number in $price) {
+                                    try {
+                                        [int]::Parse($number)
+                                        } catch {
+                                        }
+                                   }
+
+                        $beds = ForEach ($number in $beds) {
+                                    try {
+                                        [int]::Parse($number)
+                                        } catch {
+                                        }
+                                   }
+
+                        $baths = ForEach ($number in $baths) {
+                                    try {
+                                        [int]::Parse($number)
+                                        } catch {
+                                        }
+                                   }
+
+                        # Mortgage Calculator
+
+                        $allMort = for ($i = 0; $i -lt $askingPrice.Count; $i++) {
+                                        $apr = 5 / 100
+                                        $ask = $askingPrice[$i] * .8
+                                        $down = $ask * .2
+                                        $totalMort = $ask - $down
+                                        $monthlyInt = $apr / 12
+                                        $totalPayments = 30 * 12
+                                        $Numorator = 1 + $monthlyInt
+                                        $power = [math]::Pow($Numorator, $totalPayments)
+                                        $multiplier = $monthlyInt * $power
+                                        $denom = $power - 1
+                                        $top = $totalMort * $multiplier
+                                        $monthlyPayment = $top / $denom
+                                        $monthlyPayment = [math]::Ceiling($monthlyPayment)
+                                        $monthlyTax = ($proptax * $ask) / 12
+                                        $monthlyTotal = $monthlyPayment + $monthlyIns + $monthlyTax
+                                        $monthlyTotal = [math]::Ceiling($monthlyTotal)
+                                        Write $monthlyTotal
+                                        }
+
+
+                        # Gets average rent
+
+                        $bathsForRent = for ($i = 0; $i -lt $baths.Count; $i++) {
+                                [math]::Floor($baths[$i])
+                                }
+
+                        $allRents = for ($i = 0; $i -lt $bathsForRent.Count; $i++) {
+                                Write-Progress -Activity "Getting average rent" -Status "Working..." -ID 4 -PercentComplete (($i / $bathsForRent.Count) * 100) -ParentId 3
+                                sleep 20
+                                $rentLocation = $city + "-" + $state
+                                $rentURL = "https://www.apartments.com/houses/$rentLocation/" + $beds[$i] + "-bedrooms-" + $bathsForRent[$i] + "-bathrooms"
+                                $rentPage = IWR -Uri $rentURL
+                                $spanPrices = $rentPage.ParsedHtml.getElementsbyTagName("span") | Where-Object { $_.classname -like "altRentDisplay*" } 
+                                $spanPrices = $spanPrices.innerText
+                                $divPrices = $rentPage.ParsedHtml.getElementsbyTagName("div") | Where-Object { $_.classname -like "*price-range*" -or $_.classname -like "*apartmentRentRollupContainer*" }
+                                $divPrices = $divPrices.innerText
+                                $divPrices = foreach ( $price in $divPrices) { 
+                                    $divPrices.Split(" ")[0] 
+                                    }
+                                if ($spanPrices -gt 0) {
+                                    $allPrice = $spanPrices
+                                    } else {
+                                        $allPrices = $divPrices
+                                        }
+                                $allPrices = $allPrices -replace '[$,]'
+                                $allPricesInt = foreach($number in $allPrices) {
+                                        try {
+                                            [int]::Parse($number)
+                                            } catch {
+                                            }
+                                        }
+                                $average = $AllPricesInt | measure -Average -Sum -Minimum -Maximum
+                                $avgRent = [math]::Ceiling($average.Average)
+                                Write $avgRent
+                                }
+
+                        # Operating Expenses
+
+                        $allExpenses = for ( $i = 0; $i -lt $address.Count; $i++) {
+                                $vacancy = $allRents[$i] * .05
+                                $repairs = $allRents[$i] * .05
+                                $capex = $allRents[$i] * .1
+                                $propMgr = $allRents[$i] * .1
+                                $totalExpense = $vacancy + $repairs + $capex + $propMgr
+                                $totalExpense = [math]::Ceiling($totalExpense)
+                                Write $totalExpense
+                                }
+
+
+                        # Creats ArrayLists
+
+                        $allAddresses = [System.Collections.ArrayList]@()
+                        $allPrices = [System.Collections.ArrayList]@()
+                        $allBeds = [System.Collections.ArrayList]@()
+                        $allBaths = [System.Collections.ArrayList]@()
+
+                        # Collects addresses, prices, beds, and baths into Arraylists
+
+                        foreach ($line in $address) {
+                            $null = $allAddresses.Add($line)
+                            }
+
+                        foreach ($line in $askingPrice) {
+                            $null = $allPrices.Add($line)
+                            }
+
+                        foreach ($line in $beds) {
+                            $null = $allBeds.Add($line)
+                            }
+
+                        foreach ($line in $bathsForRent) {
+                            $null = $allBaths.Add($line)
+                            }
+
+                        # Combines address, price, beds, and baths arrays in one array
+
+                        for ($i = 0; $i -lt $address.Count; $i++) {
+                              [PSCustomObject]@{
+                                    Address = $allAddresses[$i]
+                                    'Asking Price' = $allPrices[$i]
+                                    Beds = $allBeds[$i]
+                                    Baths = $allBaths[$i]
+                                    Offer = $allPrices[$i] * .8
+                                    'Down Payment' = $allPrices[$i] * .2
+                                    'Monthly Mortgage' = $allMort[$i]
+                                    'Average Rent' = $allRents[$i]
+                                    'Monthly Expenses' = $allMort[$i] + $allExpenses[$i]
+                                    'Monthly Cash flow' = $allRents[$i] - ($allMort[$i] + $allExpenses[$i])
+                                    'Annual Cash flow' = ($allRents[$i] - ($allMort[$i] + $allExpenses[$i])) * 12
+                                    ROI = (($allRents[$i] - ($allMort[$i] + $allExpenses[$i])) * 12) / (($allPrices[$i] * .8) * .2)
+                                    }
+                               }
+
+                        1..$sec |
+
+                        ForEach-Object { $percent = $_ * 100 / $sec;
+                            Write-Progress -Activity "Taking a break before next page" -Status "$($sec - $_) seconds remaining..." -ID 5 -PercentComplete $percent -ParentId 3
+                            Start-Sleep -Seconds 1
+                            }
+
+                        if ($num -eq 9 -or $num -eq 18 -or $num -eq 27 -or $num -eq 36 -or $num -eq 45 -or $num -eq 54 -or $num -eq 63 -or $num -eq 72 -or $num -eq 81 -or $num -eq 90 -or $num -eq 99) {
+                            1..1800 |
+                            ForEach-Object { $percent = $_ * 100 / 1800;
+                                Write-Progress -Activity "Whew Im out of breathe from moving so fast! Break time..." -Status "$(1800 - $_) seconds remaining..." -ID 6 -PercentComplete $percent -ParentId 3
+                                Start-Sleep -Seconds 1
+                                }
+                            }
+                            
+        }
+
+        $allData  | ConvertTo-Excel "Market_data.xlsx" -ExcelWorkSheetName "$city_state" -AutoFit
+
+        $minutes = $minuteArray | Get-Random
+
+        1..$minutes |
+
+        ForEach-Object { $percent = $_ * 100 / $minutes; 
+            Write-Progress -Activity "Taking a break before next city" -Status "$($minutes - $_) seconds remaining..." -Id 7 -PercentComplete $percent -ParentId 1; 
+            Start-Sleep -Seconds 1
+            }
+
+}
