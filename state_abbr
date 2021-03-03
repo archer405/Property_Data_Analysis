@@ -54,4 +54,3 @@ $a.Keys | % { $Rhash=@{} } { $Rhash[$a[$_]] = $_ }
 if ($state.Length -eq 2) {
     $global:fullState = $Rhash.$state
     }
-
