@@ -1,0 +1,252 @@
+[
+  {
+    "State": "New Jersey",
+    "medianPropertyTax": "0.0189",
+    "Pop": 8936570
+  },
+  {
+    "State": "New Hampshire",
+    "medianPropertyTax": "0.0186",
+    "Pop": 1371250
+  },
+  {
+    "State": "Texas",
+    "medianPropertyTax": "0.0181",
+    "Pop": 29472300
+  },
+  {
+    "State": "Wisconsin",
+    "medianPropertyTax": "0.0176",
+    "Pop": 5851750
+  },
+  {
+    "State": "Nebraska",
+    "medianPropertyTax": "0.0176",
+    "Pop": 1952570
+  },
+  {
+    "State": "Illinois",
+    "medianPropertyTax": "0.0173",
+    "Pop": 12659700
+  },
+  {
+    "State": "Connecticut",
+    "medianPropertyTax": "0.0163",
+    "Pop": 3563080
+  },
+  {
+    "State": "Michigan",
+    "medianPropertyTax": "0.0162",
+    "Pop": 10045000
+  },
+  {
+    "State": "Vermont",
+    "medianPropertyTax": "0.0159",
+    "Pop": 628061
+  },
+  {
+    "State": "North Dakota",
+    "medianPropertyTax": "0.0142",
+    "Pop": 761723
+  },
+  {
+    "State": "Ohio",
+    "medianPropertyTax": "0.0136",
+    "Pop": 11747700
+  },
+  {
+    "State": "Rhode Island",
+    "medianPropertyTax": "0.0135",
+    "Pop": 1056160
+  },
+  {
+    "State": "Pennsylvania",
+    "medianPropertyTax": "0.0135",
+    "Pop": 12820900
+  },
+  {
+    "State": "Kansas",
+    "medianPropertyTax": "0.0129",
+    "Pop": 2910360
+  },
+  {
+    "State": "Iowa",
+    "medianPropertyTax": "0.0129",
+    "Pop": 3179850
+  },
+  {
+    "State": "South Dakota",
+    "medianPropertyTax": "0.0128",
+    "Pop": 903027
+  },
+  {
+    "State": "New York",
+    "medianPropertyTax": "0.0123",
+    "Pop": 19440500
+  },
+  {
+    "State": "Maine",
+    "medianPropertyTax": "0.0109",
+    "Pop": 1345790
+  },
+  {
+    "State": "Minnesota",
+    "medianPropertyTax": "0.0105",
+    "Pop": 5700670
+  },
+  {
+    "State": "Massachusetts",
+    "medianPropertyTax": "0.0104",
+    "Pop": 6976600
+  },
+  {
+    "State": "Alaska",
+    "medianPropertyTax": "0.0104",
+    "Pop": 734002
+  },
+  {
+    "State": "Florida",
+    "medianPropertyTax": "0.0097",
+    "Pop": 21993000
+  },
+  {
+    "State": "Washington",
+    "medianPropertyTax": "0.0092",
+    "Pop": 7797100
+  },
+  {
+    "State": "Missouri",
+    "medianPropertyTax": "0.0091",
+    "Pop": 6169270
+  },
+  {
+    "State": "Oregon",
+    "medianPropertyTax": "0.0087",
+    "Pop": 4301090
+  },
+  {
+    "State": "Maryland",
+    "medianPropertyTax": "0.0087",
+    "Pop": 6083120
+  },
+  {
+    "State": "Indiana",
+    "medianPropertyTax": "0.0085",
+    "Pop": 6745350
+  },
+  {
+    "State": "Nevada",
+    "medianPropertyTax": "0.0084",
+    "Pop": 3139660
+  },
+  {
+    "State": "Montana",
+    "medianPropertyTax": "0.0083",
+    "Pop": 1086760
+  },
+  {
+    "State": "Georgia",
+    "medianPropertyTax": "0.0083",
+    "Pop": 10736100
+  },
+  {
+    "State": "North Carolina",
+    "medianPropertyTax": "0.0078",
+    "Pop": 10611900
+  },
+  {
+    "State": "Virginia",
+    "medianPropertyTax": "0.0074",
+    "Pop": 8626210
+  },
+  {
+    "State": "Oklahoma",
+    "medianPropertyTax": "0.0074",
+    "Pop": 3954820
+  },
+  {
+    "State": "California",
+    "medianPropertyTax": "0.0074",
+    "Pop": 39937500
+  },
+  {
+    "State": "Kentucky",
+    "medianPropertyTax": "0.0072",
+    "Pop": 4499690
+  },
+  {
+    "State": "Arizona",
+    "medianPropertyTax": "0.0072",
+    "Pop": 7378490
+  },
+  {
+    "State": "Idaho",
+    "medianPropertyTax": "0.0069",
+    "Pop": 1826160
+  },
+  {
+    "State": "Tennessee",
+    "medianPropertyTax": "0.0068",
+    "Pop": 6897580
+  },
+  {
+    "State": "Utah",
+    "medianPropertyTax": "0.0060",
+    "Pop": 3282120
+  },
+  {
+    "State": "Colorado",
+    "medianPropertyTax": "0.0060",
+    "Pop": 5845530
+  },
+  {
+    "State": "Wyoming",
+    "medianPropertyTax": "0.0058",
+    "Pop": 567025
+  },
+  {
+    "State": "New Mexico",
+    "medianPropertyTax": "0.0055",
+    "Pop": 2096640
+  },
+  {
+    "State": "Mississippi",
+    "medianPropertyTax": "0.0052",
+    "Pop": 2989260
+  },
+  {
+    "State": "Arkansas",
+    "medianPropertyTax": "0.0052",
+    "Pop": 3039000
+  },
+  {
+    "State": "South Carolina",
+    "medianPropertyTax": "0.0050",
+    "Pop": 5210100
+  },
+  {
+    "State": "West Virginia",
+    "medianPropertyTax": "0.0049",
+    "Pop": 1778070
+  },
+  {
+    "State": "Delaware",
+    "medianPropertyTax": "0.0043",
+    "Pop": 982895
+  },
+  {
+    "State": "Alabama",
+    "medianPropertyTax": "0.0033",
+    "Pop": 4908620
+  },
+  {
+    "State": "Hawaii",
+    "medianPropertyTax": "0.0026",
+    "Pop": 1412690
+  },
+  {
+    "State": "Louisiana",
+    "medianPropertyTax": "0.0018",
+    "Pop": 4645180
+  }
+]
